@@ -1,0 +1,333 @@
+<<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chaidi — Mascota Interactiva</title>
+<style>
+:root{
+  --bg:#0f1226; --card:#171a35; --text:#e7e9ff; --accent:#7aa2ff; --accent-2:#ffd166; --bubble:#23274d;
+}
+*{box-sizing:border-box}
+html,body{height:100%; margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif;}
+body{
+  color:var(--text);
+  background: radial-gradient(1200px 700px at 20% -10%, #243096 0%, #151a38 50%, #0b0e1f 100%);
+  display:grid; place-items:center; padding:16px;
+}
+.app{
+  width:min(900px,100%); background:var(--card); border-radius:22px; box-shadow:0 20px 60px rgba(0,0,0,.45);
+  overflow:hidden; position:relative;
+}
+header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.08);
+}
+header h1{font-size:18px; margin:0;}
+.controls{display:flex; gap:8px; flex-wrap:wrap;}
+button{
+  appearance:none; border:none; cursor:pointer; padding:10px 14px; border-radius:12px; font-weight:600;
+  background:linear-gradient(180deg, var(--accent), var(--accent-2));
+  color:#0b1022; transition: transform .08s ease, filter .2s ease;
+}
+button:active{ transform: translateY(1px) scale(.99);}
+button.secondary{ background:#2a2f5e; color:var(--text);}
+main{ display:grid; grid-template-columns: 320px 1fr; gap:18px; padding:18px; align-items:stretch; }
+@media (max-width:820px){ main{ grid-template-columns:1fr; } }
+
+/* Tarjeta Mascota */
+.pet-card{
+  background: linear-gradient(180deg, #1e224a, #14183a);
+  border-radius:18px; padding:16px; display:grid; place-items:center; min-height:320px; position:relative;
+}
+.glow{ position:absolute; width:220px; height:220px; border-radius:50%; filter: blur(60px); opacity:.35; }
+.glow.a{ background:#7aa2ff; top:-40px; right:-40px; }
+.glow.b{ background:#ffd166; bottom:-60px; left:-60px; }
+.pet{ width:220px; aspect-ratio:1/1; position:relative; animation: floaty 3.2s ease-in-out infinite; }
+@keyframes floaty { 0%{ transform: translateY(0)} 50%{ transform: translateY(-6px)} 100%{ transform: translateY(0)} }
+.eye{ transform-origin:center; animation: blink 5s infinite; }
+@keyframes blink { 0%,8%,100%{ transform: scaleY(1)} 4%{ transform: scaleY(.1)} }
+.hand{ transform-origin:160px 105px;}
+.pet.wave .hand{ animation: wave .9s ease-in-out 3; }
+@keyframes wave { 0%{ transform: rotate(0deg)} 50%{ transform: rotate(22deg)} 100%{ transform: rotate(0deg)} }
+
+.bubble{
+  background: var(--bubble); border-radius:16px; padding:16px; min-height:140px;
+  line-height:1.5; font-size:15px; position:relative;
+}
+.bubble:after{
+  content:""; position:absolute; left:18px; top:-10px; width:18px; height:18px; background:var(--bubble);
+  border-left:1px solid rgba(255,255,255,.08); border-top:1px solid rgba(255,255,255,.08); transform: rotate(45deg);
+}
+.bubble .topic{ display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:999px; background:#2b3063; margin-bottom:6px; }
+.typing{ border-right:2px solid var(--accent-2); animation: caret 1s steps(1) infinite; }
+@keyframes caret{ 50%{ border-color: transparent } }
+
+.panel{ background:#1a1e44; border-radius:18px; padding:14px; display:grid; gap:10px; }
+input{padding:10px; border-radius:10px; border:none; width:100%; font-size:15px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<header>
+<h1>🐾 Chaidi <span style="opacity:.7">— tu asistente IA</span></h1>
+<div class="controls">
+<button id="btnWave" class="secondary">👋 Saludar</button>
+<button id="btnTheme" class="secondary">🌙/☀️</button>
+</div>
+</header>
+<main>
+<section class="pet-card">
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+  <div class="pet" id="pet">
+    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="110" cy="200" rx="52" ry="10" fill="#000" opacity=".35" />
+      <defs><radialGradient id="gBody" cx="40%" cy="30%" r="70%">
+        <stop offset="0%" stop-color="#9ab9ff"/>
+        <stop offset="60%" stop-color="#7aa2ff"/>
+        <stop offset="100%" stop-color="#3954b7"/>
+      </radialGradient></defs>
+      <path d="M110 20 C150 20 190 60 190 110 C190 160 160 190 110 190 C60 190 30 160 30 110 C30 60 70 20 110 20 Z" fill="url(#gBody)"/>
+      <ellipse cx="95" cy="95" rx="40" ry="28" fill="#fff" opacity=".12"/>
+      <g>
+        <ellipse class="eye" cx="87" cy="95" rx="8" ry="10" fill="#0b1022"/>
+        <ellipse class="eye" cx="135" cy="95" rx="8" ry="10" fill="#0b1022"/>
+      </g>
+      <path d="M90 120 Q110 135 130 120" stroke="#0b1022" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <g class="hand"><circle cx="165" cy="110" r="14" fill="#7aa2ff"/></g>
+    </svg>
+  </div>
+</section>
+<section class="panel" aria-live="polite">
+  <div class="bubble">
+    <div class="topic">👋 Bienvenida</div>
+    <div id="text"><span class="typing">Hola, soy Tredi 🐾 y te doy la bienvenida a Chaidi, tu asistente IA 24/7 🤖✨.</span></div>
+  </div>
+  <input id="userInput" type="text" placeholder="Escribe tu pregunta..." />
+  <button id="btnAsk">Enviar</button>
+</section>
+</main>
+</div>
+
+<script>
+const pet = document.getElementById('pet');
+const textEl = document.getElementById('text');
+const input = document.getElementById('userInput');
+
+function typeText(text){
+  textEl.innerHTML = '<span class="typing" id="typing"></span>';
+  const t = document.getElementById('typing');
+  let p=0;
+  const timer = setInterval(()=>{
+    t.textContent = text.slice(0,p++);
+    if(p>text.length){ clearInterval(timer); t.classList.remove('typing'); speakText(text); }
+  },14);
+}
+
+function wave(){ pet.classList.remove('wave'); void pet.offsetWidth; pet.classList.add('wave'); }
+
+function speakText(text){
+  if('speechSynthesis' in window){
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'es-ES';
+    msg.pitch = 1;
+    msg.rate = 1;
+    window.speechSynthesis.speak(msg);
+  }
+}
+
+function normalize(text){
+  return text.toLowerCase()
+             .normalize("NFD")
+             .replace(/[\u0300-\u036f]/g,"")
+             .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!]/g,"")
+             .trim();
+}
+
+// --- Preguntas y respuestas ---
+const answers = {
+
+  // --- Estudio y Aprendizaje: Evolución ---
+  "que es la evolucion":"Es el proceso por el cual los seres vivos cambian con el tiempo, adaptándose al ambiente para sobrevivir.",
+  "quien propuso la teoria de la evolucion":"Charles Darwin propuso la teoría de la evolución por selección natural.",
+  "que es la seleccion natural":"Es el mecanismo mediante el cual los individuos mejor adaptados sobreviven y se reproducen.",
+  "como cambian las especies con el tiempo":"A través de mutaciones, selección natural y adaptación al entorno.",
+  "que es un organismo adaptado":"Es un organismo que tiene características que le permiten sobrevivir mejor en su ambiente.",
+  "que es una mutacion":"Cambio en el ADN de un organismo que puede generar nuevas características.",
+  "que es un fosil":"Restos o huellas de seres vivos del pasado que ayudan a estudiar la evolución.",
+  "como se relacionan los organismos":"Todos los organismos comparten ancestros comunes en algún momento de la historia evolutiva.",
+  "que es un ancestro comun":"Organismo del cual descienden varias especies actuales.",
+  "que es la deriva genetica":"Cambio en la frecuencia de genes en una población debido al azar.",
+  "que es la adaptacion":"Proceso por el cual una especie desarrolla rasgos que mejoran su supervivencia.",
+  "que es la especiacion":"Formación de nuevas especies a partir de una población ancestral.",
+  "que son los homologo":"Estructuras similares en diferentes especies por tener un ancestro común.",
+  "que son los analogos":"Estructuras con función similar pero sin ancestro común.",
+  "que es la convergencia evolutiva":"Proceso por el cual especies diferentes desarrollan rasgos similares por vivir en ambientes parecidos.",
+  "que es la divergencia evolutiva":"Cuando dos poblaciones de una especie desarrollan diferencias y forman nuevas especies.",
+  "que es un cladograma":"Diagrama que muestra relaciones evolutivas entre especies.",
+  "que es la seleccion sexual":"Cuando ciertos rasgos aumentan las posibilidades de reproducción aunque no mejoren la supervivencia.",
+  "que es la coevolucion":"Evolución de dos o más especies que interactúan entre sí y se influyen mutuamente.",
+  "que es la adaptacion fisiologica":"Cambios en el funcionamiento interno de un organismo para sobrevivir.",
+  "que es la adaptacion comportamental":"Cambios en el comportamiento de un organismo para adaptarse al ambiente.",
+  "que es la adaptacion morfologica":"Cambios en la forma o estructura de un organismo para sobrevivir.",
+  "como surge la diversidad biologica":"Por mutaciones, selección natural, migración y reproducción sexual.",
+  "que es la evolucion molecular":"Estudio de cambios en genes y proteínas a lo largo del tiempo.",
+  "que es la evolucion convergente":"Cuando especies no relacionadas desarrollan rasgos similares por vivir en ambientes parecidos.",
+  "que es la evolucion divergente":"Cuando especies relacionadas desarrollan diferencias que llevan a nuevas especies.",
+  "como se estudia la evolucion":"Mediante fósiles, genética, anatomía comparada y observación de especies actuales.",
+  "que es la paleontologia":"Ciencia que estudia los fósiles para entender la evolución.",
+  "que es un eslabon perdido":"Fósil que muestra características intermedias entre dos grupos de organismos.",
+  "que es la adaptacion al medio":"Proceso por el cual los organismos cambian para sobrevivir en su ambiente.",
+  "como influye el ambiente en la evolucion":"El ambiente selecciona las características que son más útiles para la supervivencia.",
+  "que es la competencia biologica":"Rivalidad entre organismos por recursos limitados que influye en la evolución.",
+  "que es la seleccion artificial":"Cuando los humanos eligen características para reproducir ciertos rasgos en plantas o animales.",
+  "como afecta la mutacion a la evolucion":"Genera nuevas características que pueden ser beneficiosas, neutras o perjudiciales.",
+  "que es un rasgo heredable":"Característica que puede transmitirse de padres a hijos.",
+  "como se forman las especies nuevas":"Por aislamiento geográfico, selección natural y acumulación de diferencias genéticas.",
+  "que es la variacion genetica":"Diferencias en los genes entre individuos de una población.",
+  "por que es importante la evolucion":"Explica la diversidad de la vida y cómo los organismos se adaptan al mundo.",
+  "que es la adaptacion microevolutiva":"Cambios pequeños en la población que ocurren en pocas generaciones.",
+  "que es la macroevolucion":"Cambios a gran escala que ocurren durante largos periodos y producen nuevas especies o grupos.",
+  "que es la coadaptacion":"Cuando varias características de un organismo evolucionan juntas para funcionar mejor.",
+  "que es la resiliencia biologica":"Capacidad de los organismos de sobrevivir y adaptarse a cambios ambientales.",
+  "que es la evolucion biologica":"Proceso general mediante el cual las especies cambian y se diversifican a lo largo del tiempo.",
+  "que es un organismo moderno":"Especie que ha sobrevivido y se ha adaptado a lo largo de millones de años.",
+  "como se relaciona la genetica con la evolucion":"La genética explica cómo se heredan y modifican los rasgos en la evolución.",
+  "que es la seleccion de rasgos":"Proceso donde ciertos rasgos aumentan la supervivencia y reproducción.",
+  "como surge un rasgo nuevo":"Por mutación, recombinación genética o adaptación.",
+  "que es la evolucion continua":"La idea de que la evolución no se detiene y siempre sigue modificando a los seres vivos.",
+  "que es la seleccion de poblacion":"Cuando algunas poblaciones sobreviven y otras desaparecen según sus rasgos.",
+  "como se determina la edad de un fosil":"Mediante datación radiométrica y análisis de estratos geológicos.",
+  "que es la evolucion explicada a niños":"Los animales y plantas cambian poco a poco con el tiempo para sobrevivir mejor.",
+  
+
+  // --- Trabajo y Productividad ---
+  "como escribir un correo formal":"Puedes comenzar con un saludo cordial, explicar claramente el motivo del correo y finalizar con un agradecimiento y tu nombre.",
+  "como organizar mis tareas":"Haz una lista con prioridad: urgente e importante, importante pero no urgente, urgente pero no importante, y ni urgente ni importante.",
+  "como hacer un plan de trabajo":"Define objetivos claros, divide las tareas en pasos y establece plazos realistas.",
+  "como mejorar la productividad":"Evita distracciones, establece metas, toma descansos cortos y prioriza tareas importantes.",
+  "como gestionar el tiempo":"Usa agendas, cronogramas y técnicas como Pomodoro para aprovechar mejor tu tiempo.",
+  "como preparar una presentacion":"Estructura introducción, desarrollo y cierre; usa diapositivas visuales y ejemplos claros.",
+  "como liderar un equipo":"Comunica metas, escucha a tu equipo, distribuye responsabilidades y motiva constantemente.",
+  "como dar retroalimentacion":"Sé claro, específico y constructivo; enfatiza puntos positivos y áreas de mejora.",
+  "como trabajar en equipo":"Colabora, respeta opiniones, distribuye tareas según habilidades y comunica avances.",
+  "como organizar reuniones efectivas":"Define objetivos, agenda, tiempo limitado y conclusiones claras.",
+  "como tomar decisiones rapidas":"Analiza opciones, considera consecuencias y actúa con seguridad.",
+  "como planificar proyectos":"Divide el proyecto en fases, asigna responsables y establece plazos.",
+  "como escribir reportes claros":"Usa estructura: introducción, desarrollo, conclusiones; lenguaje preciso y claro.",
+  "como mantener la motivacion":"Fija metas, celebra logros, reconoce avances y mantén un ambiente positivo.",
+  "como mejorar la concentracion":"Minimiza distracciones, haz pausas activas y organiza el espacio de trabajo.",
+  "como delegar tareas":"Identifica habilidades, asigna responsabilidades claras y supervisa avances.",
+  "como establecer prioridades":"Clasifica tareas según urgencia e importancia, y enfócate en lo esencial.",
+  "como hacer un brainstorming":"Genera muchas ideas sin juzgar, anótalas y selecciona las mejores.",
+  "como manejar el estrés laboral":"Respira, haz pausas, organiza tareas y busca apoyo cuando sea necesario.",
+  "como usar herramientas digitales":"Explora apps de productividad, gestión de tareas y comunicación para optimizar tu trabajo.",
+  "como mejorar la eficiencia":"Automatiza procesos, evita multitareas y organiza tu flujo de trabajo.",
+  "como redactar un plan de accion":"Define objetivos, pasos, responsables y fechas límite.",
+  "como evaluar resultados":"Compara objetivos iniciales con resultados, analiza fallos y mejoras posibles.",
+  "como mejorar habilidades profesionales":"Capacitación constante, práctica, retroalimentación y lectura de material especializado.",
+  "como crear un horario efectivo":"Establece bloques de tiempo para tareas importantes, descansos y actividades recurrentes.",
+  "como priorizar emails":"Clasifica según urgencia e importancia y responde primero lo crítico.",
+  "como evitar la procrastinacion":"Divide tareas, establece plazos, elimina distracciones y recompensa avances.",
+  "como hacer networking":"Conecta con personas, comparte intereses, ofrece ayuda y mantén contacto.",
+  "como redactar una carta de motivacion":"Explica quién eres, tus habilidades, experiencia y por qué quieres el puesto.",
+  "como organizar documentos":"Clasifica por tema, fecha o importancia, y usa carpetas digitales o físicas.",
+  "como mejorar presentaciones online":"Usa gráficos, ejemplos visuales, interacción y lenguaje claro.",
+  "como manejar conflictos laborales":"Escucha, busca solución común y comunica de manera calmada y respetuosa.",
+  "como establecer metas SMART":"Define metas específicas, medibles, alcanzables, relevantes y con tiempo determinado.",
+  "como hacer seguimiento de tareas":"Registra avances, ajusta plazos y revisa pendientes periódicamente.",
+  "como redactar instrucciones claras":"Usa pasos simples, numerados y con ejemplos si es necesario.",
+  "como automatizar tareas repetitivas":"Usa herramientas digitales, macros o scripts según necesidad.",
+  "como mejorar la comunicacion":"Escucha activamente, usa lenguaje claro y adapta el mensaje a la audiencia.",
+  "como crear un plan de mejora personal":"Identifica debilidades, establece objetivos y pasos para superarlas.",
+  "como gestionar proyectos complejos":"Divide en fases, asigna responsables, controla riesgos y supervisa avances.",
+  "como organizar reuniones virtuales":"Prepara agenda, comparte link, controla tiempos y resúmenes claros.",
+  "como establecer limites laborales":"Define horarios, comunica disponibilidad y aprende a decir no cuando sea necesario.",
+  "como desarrollar habilidades de liderazgo":"Practica delegación, comunicación efectiva, motivación y resolución de conflictos.",
+  "como evaluar desempeño de un equipo":"Observa resultados, cumplimiento de objetivos y actitudes del equipo.",
+  "como redactar minutas":"Incluye fecha, asistentes, temas tratados, decisiones y tareas asignadas.",
+  "como hacer un plan de carrera":"Define metas profesionales, habilidades a desarrollar y plazos para alcanzarlas.",
+  "como organizar eventos laborales":"Define objetivo, logística, agenda y responsabilidades de cada participante.",
+  "como motivar a un equipo":"Reconoce logros, comunica objetivos claros y crea un ambiente positivo y participativo.",
+  "como mejorar la eficiencia del trabajo remoto":"Establece horario fijo, espacio de trabajo, comunicación constante y evita distracciones.",
+  "como hacer un presupuesto":"Identifica ingresos, gastos, prioridades y reserva para imprevistos.",
+  "como gestionar recursos":"Optimiza tiempo, personal, dinero y materiales para cumplir objetivos.",
+  "como crear indicadores de desempeño":"Define métricas claras, medibles y alineadas con objetivos.",
+
+ // --- Creatividad y Entretenimiento ---
+ // --- Creatividad y Entretenimiento (50) ---
+"como escribir una historia interesante":"✍️ Crea personajes memorables, define un conflicto claro y un final sorprendente.",
+"que es un guion para video":"📄 Es un plan escrito con diálogos, escenas y acciones para producir un video.",
+"como escribir un poema divertido":"🎵 Usa rimas, palabras graciosas y situaciones inesperadas.",
+"que es una cancion pegajosa":"🎶 Canción con melodía fácil de recordar y letras que conectan con emociones.",
+"como crear un personaje unico":"🧙‍♂️ Dale características físicas, personalidad y motivaciones que lo hagan memorable.",
+"que es un reto creativo":"🎨 Actividad que pone a prueba tu imaginación y habilidades artísticas.",
+"como inventar un juego nuevo":"🎲 Define reglas simples, objetivo divertido y mecánica clara.",
+"que es una historia para tiktok":"📹 Relato corto y visual que atrape la atención desde los primeros segundos.",
+"como crear un contenido viral":"🔥 Hazlo entretenido, emotivo, fácil de compartir y con un toque único.",
+"que es un dibujo original":"🖌️ Ilustración creada desde tu imaginación, no copiada de otros.",
+"como escribir un guion para youtube":"📽️ Planea introducción, desarrollo y cierre, incluyendo diálogos y escenas clave.",
+"que es un reel creativo":"🎞️ Video corto con ideas visuales llamativas, música y efectos.",
+"como inventar un personaje para un juego":"👾 Define habilidades, apariencia y su historia dentro del mundo del juego.",
+"que es un poema de amor divertido":"💖 Poema romántico con situaciones graciosas o exageradas.",
+"como hacer un tiktok que llame la atencion":"🎵 Usa música popular, ideas originales y edición dinámica.",
+"que es una historia corta":"📖 Relato breve con inicio, desarrollo y desenlace claros.",
+"como crear un video educativo entretenido":"🎬 Mezcla información clara con imágenes, ejemplos y humor.",
+"que es un sketch comico":"😂 Escena corta diseñada para hacer reír.",
+"como hacer un reto artistico":"✏️ Desafío creativo, dibujar algo en 5 minutos o usar materiales inusuales.",
+"que es un contenido interactivo":"🖱️ Contenido donde la audiencia puede participar o decidir resultados.",
+"como crear una cancion pegajosa para redes":"🎶 Melodías simples, repetición y letras fáciles de recordar.",
+"que es un poema epico":"🏰 Poema largo que cuenta hazañas heroicas o historias grandiosas.",
+"como inventar un mundo ficticio":"🌎 Define geografía, culturas, personajes y reglas de tu universo.",
+"que es un reto de dibujo rapido":"⏱️ Dibujar algo en tiempo límite para estimular creatividad.",
+"como hacer un video viral":"🔥 Mezcla emoción, sorpresa, humor y contenido fácil de compartir.",
+"que es un storyboard":"📑 Conjunto de dibujos que representan escenas de un video o animación.",
+"como crear un juego de mesa original":"🎲 Define objetivo, reglas claras, piezas y estrategia divertida.",
+"que es un poema visual":"🖼️ Poema acompañado de imágenes que refuercen su mensaje.",
+"como inventar un personaje comico":"🤡 Exageraciones físicas, hábitos raros y frases graciosas.",
+"que es un reto musical":"🎵 Desafío para crear o interpretar música de forma divertida o creativa.",
+"como hacer un tiktok con efectos especiales":"✨ Usa filtros, transiciones y edición para resaltar momentos clave.",
+"que es un video de storytelling":"📖 Video que cuenta una historia que atrapa emocionalmente al espectador.",
+"como crear un poema rimado":"🎶 Elige palabras que rimen y combínalas en versos con sentido y ritmo.",
+"que es un reel de humor":"😂 Video corto diseñado para hacer reír usando situaciones cotidianas o exageradas.",
+"como inventar un personaje de videojuego":"👾 Define habilidades, debilidades, apariencia y motivaciones dentro del juego.",
+"que es un juego de palabras creativo":"📝 Juego que usa imaginación y lenguaje para generar diversión.",
+"como hacer un reto de fotografia":"📸 Capturar imágenes con un tema, estilo o límite de tiempo.",
+"que es un video educativo creativo":"🎬 Video que enseña algo de forma divertida, usando animaciones o ejemplos claros.",
+"como escribir un guion de comedia":"😂 Mezcla situaciones absurdas, diálogos ingeniosos y personajes exagerados.",
+"que es un poema con estructura libre":"📝 Poema sin rimas ni métricas estrictas, donde la creatividad guía la forma.",
+"como hacer un tiktok con narrativa":"🎥 Historia corta con inicio, conflicto y final en pocos segundos.",
+"que es un juego de improvisacion":"🎭 Juego donde los participantes crean escenas o historias en el momento sin preparación.",
+"como inventar un reto viral":"🔥 Simple, divertido, fácil de replicar y con un toque único.",
+"que es un poema comico para ninos":"🧒 Poema divertido con rimas, exageraciones y situaciones imaginativas.",
+"como crear un guion de aventura":"🗺️ Define héroes, villanos, obstáculos y un objetivo emocionante.",
+"que es un video de asmr creativo":"🎧 Video que combina sonidos relajantes con creatividad visual o temática.",
+"como hacer un reel de tendencias":"🎶 Usa música popular, efectos y participa en challenges que estén en auge.",
+"que es un personaje caricaturesco":"🤡 Personaje exagerado en sus rasgos y personalidad para causar humor o impacto visual.",
+"como crear un poema tematico":"📝 Escoge un tema (amor, naturaleza, humor) y escribe versos centrados en él.",
+"que es un reto de animacion":"🎞️ Desafío para crear animaciones cortas con límite de tiempo o estilo específico.",
+
+ // --- Dudas Generales y Curiosidades ---
+"por que llueve":"🌧️ El agua de ríos, lagos y océanos se evapora con el calor del sol. Esa humedad sube, forma nubes y cuando hay demasiada agua, cae en forma de lluvia.",
+"que libros o peliculas me recomiendas":"📖 Para leer, 'El Principito' o 'Harry Potter'. Para películas, 'Paddington 2' o 'Coco'.",
+"como puedo mantenerme informado":"📰 Lee noticias confiables, sigue medios oficiales, ve resúmenes de tendencias y explora podcasts educativos o de actualidad."
+};
+
+function generateAnswer(question){
+  let q = normalize(question);
+  if(answers[q]) return answers[q];
+  return "Lo siento, no tengo esa información aún 😅. Pero puedo aprender si me la enseñas!";
+}
+
+document.getElementById('btnAsk').addEventListener('click', ()=>{
+  const q = input.value;
+  if(!q) return;
+  const answer = generateAnswer(q);
+  typeText(answer);
+  input.value='';
+});
+document.getElementById('btnWave').addEventListener('click', wave);
+</script>
+</body>
+</html>
